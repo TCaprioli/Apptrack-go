@@ -4,10 +4,17 @@ import (
 	"log"
 
 	"www.github.com/TCaprioli/Apptrack-go/api"
+	db "www.github.com/TCaprioli/Apptrack-go/db/sqlc"
 )
 var addr = ":8080"
 func main() {
-	server := api.NewServer(addr)
+	conn, connErr:= db.Connect()
+	if connErr != nil {
+		log.Fatal("Failed to connect to the database")
+	}
+	log.Print("Connected to the database...")
+	store := db.NewStore(conn)
+	server := api.NewServer(addr, store)
 	log.Printf("Server starting at address %v", addr)
 	if serverErr := server.Run();serverErr != nil {
 		log.Fatal(serverErr)

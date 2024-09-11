@@ -3,14 +3,17 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+
+	db "www.github.com/TCaprioli/Apptrack-go/db/sqlc"
 )
 
 type ApiServer struct {
 	addr string
+	store *db.Store
 }
 
-func NewServer(addr string) *ApiServer {
-	return &ApiServer{addr: addr}
+func NewServer(addr string, store *db.Store) *ApiServer {
+	return &ApiServer{addr: addr, store: store}
 }
 
 func (s ApiServer) Run() error {
