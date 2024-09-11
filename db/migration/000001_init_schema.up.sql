@@ -1,0 +1,25 @@
+CREATE TABLE "users" (
+  "id" SERIAL PRIMARY KEY,
+  "email" VARCHAR(255) UNIQUE NOT NULL,
+  "password" TEXT NOT NULL,
+  "google_id" VARCHAR(255) UNIQUE,
+  "linked_in_id" VARCHAR(255) UNIQUE,
+  "name" VARCHAR(255),
+  "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE "applications" (
+  "id" SERIAL PRIMARY KEY,
+  "job_title" VARCHAR(255) NOT NULL,
+  "company" VARCHAR(255) NOT NULL,
+  "location" VARCHAR(255),
+  "application_date" DATE,
+  "user_id" INTEGER NOT NULL,
+  "status" VARCHAR(50) NOT NULL,
+  "notes" TEXT,
+  "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE
+);
