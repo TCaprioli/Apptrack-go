@@ -32,3 +32,4 @@
 ## Planned Features
 
 - **Session Management**: Future updates will introduce session management to enhance user experience and security by maintaining active user sessions across requests.
+- **Password Recovery**: Integrate go-mail to send secure tokens for resetting forgotten passwords.
