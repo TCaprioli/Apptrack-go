@@ -26,13 +26,13 @@ INSERT INTO applications (
 `
 
 type CreateApplicationParams struct {
-	JobTitle        string      `json:"job_title"`
+	JobTitle        string      `json:"jobTitle"`
 	Company         string      `json:"company"`
-	UserID          int32       `json:"user_id"`
+	UserID          int32       `json:"userId"`
 	Status          string      `json:"status"`
 	Location        null.String `json:"location"`
 	Notes           null.String `json:"notes"`
-	ApplicationDate null.Time   `json:"application_date"`
+	ApplicationDate null.Time   `json:"applicationDate"`
 }
 
 func (q *Queries) CreateApplication(ctx context.Context, arg CreateApplicationParams) (Application, error) {
@@ -102,7 +102,7 @@ LIMIT $3
 `
 
 type ListApplicationsParams struct {
-	UserID int32 `json:"user_id"`
+	UserID int32 `json:"userId"`
 	ID     int32 `json:"id"`
 	Limit  int32 `json:"limit"`
 }
@@ -154,9 +154,9 @@ WHERE id = $1 RETURNING id, job_title, company, location, application_date, user
 
 type UpdateApplicationParams struct {
 	ID              int32       `json:"id"`
-	JobTitle        string      `json:"job_title"`
+	JobTitle        string      `json:"jobTitle"`
 	Company         string      `json:"company"`
-	ApplicationDate null.Time   `json:"application_date"`
+	ApplicationDate null.Time   `json:"applicationDate"`
 	Status          string      `json:"status"`
 	Location        null.String `json:"location"`
 	Notes           null.String `json:"notes"`

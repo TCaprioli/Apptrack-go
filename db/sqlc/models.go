@@ -12,24 +12,24 @@ import (
 
 type Application struct {
 	ID              int32       `json:"id"`
-	JobTitle        string      `json:"job_title"`
+	JobTitle        string      `json:"jobTitle"`
 	Company         string      `json:"company"`
 	Location        null.String `json:"location"`
-	ApplicationDate null.Time   `json:"application_date"`
-	UserID          int32       `json:"user_id"`
+	ApplicationDate null.Time   `json:"applicationDate"`
+	UserID          int32       `json:"userId"`
 	Status          string      `json:"status"`
 	Notes           null.String `json:"notes"`
-	CreatedAt       time.Time   `json:"created_at"`
-	UpdatedAt       time.Time   `json:"updated_at"`
+	CreatedAt       time.Time   `json:"createdAt"`
+	UpdatedAt       time.Time   `json:"updatedAt"`
 }
 
 type User struct {
 	ID         int32       `json:"id"`
 	Email      string      `json:"email"`
 	Password   string      `json:"password"`
-	GoogleID   null.String `json:"google_id"`
-	LinkedInID null.String `json:"linked_in_id"`
+	GoogleID   null.String `json:"googleId"`
+	LinkedInID null.String `json:"linkedInId"`
 	Name       null.String `json:"name"`
-	UpdatedAt  time.Time   `json:"updated_at"`
-	CreatedAt  time.Time   `json:"created_at"`
+	UpdatedAt  time.Time   `json:"updatedAt"`
+	CreatedAt  time.Time   `json:"createdAt"`
 }
