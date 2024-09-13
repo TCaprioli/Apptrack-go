@@ -14,6 +14,11 @@ func applicationHandler(store *db.Store, ctx context.Context) http.Handler {
 	router := http.NewServeMux()
 	router.Handle("POST /applications", handleFuncWithCtx(createApplication, store, ctx))
 	router.Handle("GET /applications", handleFuncWithCtx(readAllApplications, store, ctx))
+
+	return router
+}
+func applicationIdHandler(store *db.Store, ctx context.Context) http.Handler {
+	router := http.NewServeMux()
 	router.Handle("GET /applications/{id}", handleFuncWithCtx(readApplication, store, ctx))
 	router.Handle("PUT /applications/{id}", handleFuncWithCtx(updateApplication, store, ctx))
 	router.Handle("DELETE /applications/{id}", handleFuncWithCtx(deleteApplication, store, ctx))

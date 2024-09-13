@@ -19,8 +19,12 @@ func NewServer(addr string, store *db.Store, ctx context.Context) *ApiServer {
 
 func (s ApiServer) Run() error {
 	router := http.NewServeMux()
+	// Handles login and register
 	router.Handle("/users/", userHandler(s.store, s.ctx))
+	// Handles create and get one
 	router.Handle("/applications", authMiddleware(applicationHandler(s.store, s.ctx)))
+	// Handles get one, update, and delete
+	router.Handle("/applications/", authMiddleware(applicationIdHandler(s.store, s.ctx)))
 
 	server := http.Server{Addr: s.addr, Handler: router}
 	return server.ListenAndServe()
