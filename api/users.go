@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/o1egl/paseto"
 	db "www.github.com/TCaprioli/Apptrack-go/db/sqlc"
 	"www.github.com/TCaprioli/Apptrack-go/utils"
@@ -80,11 +79,7 @@ type UserResponse struct {
 }
 
 func loginUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx context.Context) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
+	utils.LoadEnv()
 	symmetricKey := os.Getenv("SECRET_KEY")
 
 	var params struct {

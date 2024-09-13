@@ -2,13 +2,12 @@ package api
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
-	"github.com/joho/godotenv"
 	"github.com/o1egl/paseto"
+	"www.github.com/TCaprioli/Apptrack-go/utils"
 )
 
 var authorizationTypeBearer = "bearer"
@@ -22,11 +21,7 @@ type UserContext struct {
 }
 
 func authMiddleware(next http.Handler) http.Handler {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
+	utils.LoadEnv()
 	symmetricKey := os.Getenv("SECRET_KEY")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get("Authorization")
