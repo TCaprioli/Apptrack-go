@@ -12,14 +12,15 @@
 
 - **Backend**: Go
 - **Database**: PostgreSQL
-- **Authentication**: Paseto
+- **Authentication**: JWT
 
 ## Endpoints
 
 ### Authentication
 
-- **POST** `/auth/login` - User login
-- **POST** `/auth/register` - User registration
+- **POST** `/uers/login` - User login
+- **POST** `/users/register` - User registration
+- **POST** `/users/me` - User verification
 
 ### Job Applications
 
