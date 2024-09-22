@@ -3,11 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
-	"os"
 	"strings"
-
-	"github.com/o1egl/paseto"
-	"www.github.com/TCaprioli/Apptrack-go/utils"
 )
 
 var authorizationTypeBearer = "bearer"
@@ -21,8 +17,6 @@ type UserContext struct {
 }
 
 func authMiddleware(next http.Handler) http.Handler {
-	utils.LoadEnv()
-	symmetricKey := os.Getenv("SECRET_KEY")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get("Authorization")
 		if header == "" {
@@ -43,7 +37,7 @@ func authMiddleware(next http.Handler) http.Handler {
 
 		token := fields[1]
 		var user UserContext
-		err := paseto.NewV2().Decrypt(token, []byte(symmetricKey), &user.id, nil)
+		_, err := verifyToken(token)
 		if err != nil {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
@@ -51,5 +45,20 @@ func authMiddleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, UserKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func enableCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
 	})
 }

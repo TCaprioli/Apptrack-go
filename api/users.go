@@ -5,25 +5,25 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/o1egl/paseto"
 	db "www.github.com/TCaprioli/Apptrack-go/db/sqlc"
-	"www.github.com/TCaprioli/Apptrack-go/utils"
 )
+
+type UserResponse struct {
+	ID    int32  `json:"id"`
+	Email string `json:"email"`
+	Token string `json:"token"`
+}
 
 func userHandler(store *db.Store, ctx context.Context) http.Handler {
 	router := http.NewServeMux()
 	router.Handle("POST /users/register", handleFuncWithCtx(registerUser, store, ctx))
 	router.Handle("POST /users/login", handleFuncWithCtx(loginUser, store, ctx))
+	router.Handle("POST /users/me", handleFuncWithCtx(verifyUser, store, ctx))
 	return router
 }
 
 func registerUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx context.Context) {
-	utils.LoadEnv()
-
-	symmetricKey := os.Getenv("SECRET_KEY")
-
 	var params db.CreateUserParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -54,14 +54,13 @@ func registerUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx c
 		log.Printf("Error creating user: %v", err)
 		return
 	}
-	token, err := paseto.NewV2().Encrypt([]byte(symmetricKey), user.ID, nil)
+	tokenString, err := createToken(user.ID, user.Email)
 	if err != nil {
-		log.Fatal([]byte(symmetricKey))
-		http.Error(w, "Error setting token", http.StatusUnauthorized)
+		http.Error(w, "Failed to sign token", http.StatusInternalServerError)
+		log.Print(err)
 		return
 	}
-
-	userWithToken := UserResponse{Token: token, ID: user.ID, Email: user.Email}
+	userWithToken := UserResponse{Token: tokenString, ID: user.ID, Email: user.Email}
 
 	log.Printf("Creating user...")
 	w.Header().Set("Content-Type", "application/json")
@@ -72,16 +71,7 @@ func registerUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx c
 	}
 }
 
-type UserResponse struct {
-	ID    int32  `json:"id"`
-	Email string `json:"email"`
-	Token string `json:"token"`
-}
-
 func loginUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx context.Context) {
-	utils.LoadEnv()
-	symmetricKey := os.Getenv("SECRET_KEY")
-
 	var params struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -102,14 +92,14 @@ func loginUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx cont
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
-	token, err := paseto.NewV2().Encrypt([]byte(symmetricKey), user.ID, nil)
+	tokenString, err := createToken(user.ID, user.Email)
 	if err != nil {
-		log.Fatal([]byte(symmetricKey))
-		http.Error(w, "Error setting token", http.StatusUnauthorized)
+		http.Error(w, "Failed to sign token", http.StatusInternalServerError)
+		log.Print(err)
 		return
 	}
 
-	userWithToken := UserResponse{Token: token, ID: user.ID, Email: user.Email}
+	userWithToken := UserResponse{Token: tokenString, ID: user.ID, Email: user.Email}
 
 	log.Printf("Logging in...")
 	w.Header().Set("Content-Type", "application/json")
@@ -117,4 +107,26 @@ func loginUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx cont
 		http.Error(w, "Failed to encode users response", http.StatusInternalServerError)
 		return
 	}
+}
+
+func verifyUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx context.Context) {
+	var params struct {
+		Token string
+	}
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error decoding request body: %v", err)
+		return
+	}
+	token, err := verifyToken(params.Token)
+	if err != nil {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		log.Print(err)
+		return
+	}
+	if err := json.NewEncoder(w).Encode(token.Claims); err != nil {
+		http.Error(w, "Failed to encode token", http.StatusInternalServerError)
+		return
+	}
+
 }

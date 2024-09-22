@@ -26,6 +26,6 @@ func (s ApiServer) Run() error {
 	// Handles get one, update, and delete
 	router.Handle("/applications/", authMiddleware(applicationIdHandler(s.store, s.ctx)))
 
-	server := http.Server{Addr: s.addr, Handler: router}
+	server := http.Server{Addr: s.addr, Handler: enableCors(router)}
 	return server.ListenAndServe()
 }
