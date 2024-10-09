@@ -27,13 +27,25 @@ func applicationIdHandler(store *db.Store, ctx context.Context) http.Handler {
 }
 
 func createApplication(w http.ResponseWriter, r *http.Request, store *db.Store, ctx context.Context) {
+	user := r.Context().Value(UserKey).(UserContext)
+
 	var params db.CreateApplicationParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Printf("Error decoding request body: %v", err)
 		return
 	}
-	jobApplication, err := store.CreateApplication(ctx, params)
+	paramsWithUserId := db.CreateApplicationParams{
+		UserID:			 user.id,
+		JobTitle:        params.JobTitle,
+		Company:         params.Company,
+		ApplicationDate: params.ApplicationDate,
+		Status:          params.Status,
+		Location:        params.Location,
+		Notes:           params.Notes,
+	}
+
+	jobApplication, err := store.CreateApplication(ctx, paramsWithUserId)
 	if err != nil {
 		http.Error(w, "Failed to create job application", http.StatusInternalServerError)
 		log.Printf("Error creating job application: %v", err)
@@ -104,11 +116,12 @@ func readApplication(w http.ResponseWriter, r *http.Request, store *db.Store, ct
 	jobApplication, err := store.GetApplication(ctx, id)
 	if err != nil {
 		http.Error(w, "Failed to get job application data", http.StatusInternalServerError)
+		return
 	}
 
 	if jobApplication.UserID != user.id {
 		http.Error(w, "You are not authorized to get this job application", http.StatusUnauthorized)
-
+		return
 	}
 
 	log.Printf("Fetching job id %v...", id)
@@ -124,6 +137,7 @@ func updateApplication(w http.ResponseWriter, r *http.Request, store *db.Store, 
 	var params db.UpdateApplicationParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		http.Error(w, "Failed decoding request body", http.StatusBadRequest)
+		return
 	}
 	paramsWithId := db.UpdateApplicationParams{
 		ID:              id,
@@ -137,6 +151,7 @@ func updateApplication(w http.ResponseWriter, r *http.Request, store *db.Store, 
 	jobApplication, err := store.UpdateApplication(ctx, paramsWithId)
 	if err != nil {
 		http.Error(w, "Failed to update job application", http.StatusInternalServerError)
+		return
 	}
 
 	log.Printf("Updating job id %v...", id)
