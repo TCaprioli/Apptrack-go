@@ -13,7 +13,7 @@ type contextKey string
 const UserKey contextKey = "user"
 
 type UserContext struct {
-	id int32
+	ID int32
 }
 
 func authMiddleware(next http.Handler) http.Handler {
@@ -37,11 +37,17 @@ func authMiddleware(next http.Handler) http.Handler {
 
 		token := fields[1]
 		var user UserContext
-		_, err := verifyToken(token)
+		verified, err := verifyToken(token)
 		if err != nil {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
+		claims, ok:= verified.Claims.(*MyClaims)
+		if !ok {
+			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+			return
+		}
+		user = UserContext{ID: int32(claims.UserID)}
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, UserKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))

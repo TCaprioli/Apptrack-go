@@ -14,6 +14,11 @@ import (
 	"www.github.com/TCaprioli/Apptrack-go/utils"
 )
 
+type MyClaims struct {
+    UserID int    `json:"id"`
+    Email  string `json:"email"`
+    jwt.RegisteredClaims // Embedding to include standard claims (e.g., exp, iat)
+}
 func parseId(idStr string, w http.ResponseWriter) int32 {
 	var id int32
 	if idStr == "" {
@@ -37,7 +42,7 @@ func verifyToken(tokenString string) (*jwt.Token, error) {
 	utils.LoadEnv()
 	symmetricKey := os.Getenv("SECRET_KEY")
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString,&MyClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(symmetricKey), nil
 	})
 	if err != nil {

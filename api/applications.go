@@ -36,7 +36,7 @@ func createApplication(w http.ResponseWriter, r *http.Request, store *db.Store, 
 		return
 	}
 	paramsWithUserId := db.CreateApplicationParams{
-		UserID:			 user.id,
+		UserID:			 user.ID,
 		JobTitle:        params.JobTitle,
 		Company:         params.Company,
 		ApplicationDate: params.ApplicationDate,
@@ -83,7 +83,7 @@ func readAllApplications(w http.ResponseWriter, r *http.Request, store *db.Store
 	}
 
 	params := db.ListApplicationsParams{
-		UserID: user.id,
+		UserID: user.ID,
 		ID:     lastID,
 		Limit:  limit,
 	}
@@ -119,7 +119,7 @@ func readApplication(w http.ResponseWriter, r *http.Request, store *db.Store, ct
 		return
 	}
 
-	if jobApplication.UserID != user.id {
+	if jobApplication.UserID != user.ID {
 		http.Error(w, "You are not authorized to get this job application", http.StatusUnauthorized)
 		return
 	}
