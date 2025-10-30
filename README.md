@@ -38,5 +38,5 @@
 
 ## Starting the server
 
-- set up the `.env.development` in the project root using `env.development.example`
-- run `docker-compose up --build`
+- set up the `.env` in the project root using `env.development.example`
+- run `docker-compose up -d --build`
