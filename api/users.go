@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	db "www.github.com/TCaprioli/Apptrack-go/db/sqlc"
 )
@@ -20,6 +21,7 @@ func userHandler(store *db.Store, ctx context.Context) http.Handler {
 	router.Handle("POST /users/register", handleFuncWithCtx(registerUser, store, ctx))
 	router.Handle("POST /users/login", handleFuncWithCtx(loginUser, store, ctx))
 	router.Handle("POST /users/me", handleFuncWithCtx(verifyUser, store, ctx))
+	router.Handle("DELETE /users/logout", http.HandlerFunc(logoutUser))
 	return router
 }
 
@@ -63,6 +65,17 @@ func registerUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx c
 	userWithToken := UserResponse{Token: tokenString, ID: user.ID, Email: user.Email}
 
 	log.Printf("Creating user...")
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    tokenString,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(24 * time.Hour),
+	})
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(userWithToken); err != nil {
 		http.Error(w, "Failed to encode user response", http.StatusInternalServerError)
@@ -102,6 +115,16 @@ func loginUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx cont
 	userWithToken := UserResponse{Token: tokenString, ID: user.ID, Email: user.Email}
 
 	log.Printf("Logging in...")
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    tokenString,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(24 * time.Hour),
+	})
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(userWithToken); err != nil {
 		http.Error(w, "Failed to encode users response", http.StatusInternalServerError)
@@ -128,5 +151,18 @@ func verifyUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx con
 		http.Error(w, "Failed to encode token", http.StatusInternalServerError)
 		return
 	}
+}
 
+func logoutUser(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Logging out...")
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(-24 * time.Hour),
+	})
+	w.WriteHeader(http.StatusOK)
 }
