@@ -7,7 +7,7 @@
 - **CRUD Operations**: Manage job applications through the API (Create, Read, Update, Delete).
 - **User Authentication**: Authentication for users using Paseto.
 - **Protected Routes**: Job application endpoints are secured by an auth middleware.
-  
+
 ## Tech Stack
 
 - **Backend**: Go
@@ -35,3 +35,8 @@
 - **Session Management**: Future updates will introduce session management to enhance user experience and security by maintaining active user sessions across requests.
 - **Password Recovery**: Integrate go-mail to send secure tokens for resetting forgotten passwords.
 - **Third-party Authorization**: Enable users to log in using their Google and LinkedIn accounts.
+
+## Starting the server
+
+- set up the `.env.development` in the project root using `env.development.example`
+- run `docker-compose up --build`
