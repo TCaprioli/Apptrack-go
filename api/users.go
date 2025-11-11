@@ -133,26 +133,25 @@ func loginUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx cont
 }
 
 func verifyUser(w http.ResponseWriter, r *http.Request, store *db.Store, ctx context.Context) {
-	var params struct {
-		Token string
-	}
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		log.Printf("Error decoding request body: %v", err)
-		return
-	}
-	token, err := verifyToken(params.Token)
+	cookie, err := r.Cookie("token")
 	if err != nil {
-		http.Error(w, "Invalid token", http.StatusUnauthorized)
-		log.Print(err)
+		http.Error(w, "Unauthorized: missing cookie", http.StatusUnauthorized)
 		return
 	}
+
+	token, err := verifyToken(cookie.Value)
+	if err != nil {
+		http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
+		log.Printf("Token verification failed: %v", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(token.Claims); err != nil {
-		http.Error(w, "Failed to encode token", http.StatusInternalServerError)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
 }
-
 func logoutUser(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Logging out...")
 	http.SetCookie(w, &http.Cookie{
