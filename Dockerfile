@@ -17,7 +17,7 @@ COPY . .
 RUN go build -o main .
 
 # Install golang-migrate
-RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.18.3
 
 # Make the startup script executable
 COPY start.sh .
